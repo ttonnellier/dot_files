@@ -53,6 +53,10 @@ alias -s pdf='okular'
 
 export PATH=/opt/fpga-toolchain/bin:$PATH
 export GHDL_PREFIX=/opt/fpga-toolchain/lib/ghdl
-export VUNIT_SIMULATOR=modelsim 
+export LM_LICENSE_FILE=1718@10.100.10.55
 export VUNIT_MODELSIM_PATH=/opt/Questa/questasim/linux_x86_64
-export LM_LICENSE_FILE=57551@10.100.10.55
+export VIVADO_COMP_LIBS=/home/tibo/Documents/code/vivado_compiled_libs_questa;
+export VUNIT_SIMULATOR=modelsim
+
+alias ctags_vhd="find . \( -name '*.vhd' \) -print | xargs ctags"
+

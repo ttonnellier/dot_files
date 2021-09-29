@@ -59,4 +59,6 @@ export VIVADO_COMP_LIBS=/home/tibo/Documents/code/vivado_compiled_libs_questa;
 export VUNIT_SIMULATOR=modelsim
 
 alias ctags_vhd="find . \( -name '*.vhd' \) -print | xargs ctags"
+alias vim="nvim"
 
+PATH="$HOME/.local/bin:$PATH"

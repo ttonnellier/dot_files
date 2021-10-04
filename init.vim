@@ -1,9 +1,10 @@
 " auto-install vim-plug
-if empty(glob('~/.config/nvim/autoload/plug.vim'))
-    silent !curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+let s:vimplg = stdpath('data') . '/site/autoload/plug.vim'
+if empty(glob(s:vimplg))
+    execute '!curl -fLo ' s:vimplg ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     autocmd VimEnter * PlugInstall
 endif
-call plug#begin('~/.config/nvim/plugged')
+call plug#begin(stdpath('data') . '/plugged')
 Plug 'itchyny/lightline.vim'
 Plug 'patstockwell/vim-monokai-tasty'
 Plug 'junegunn/vim-easy-align'
@@ -47,11 +48,12 @@ set foldnestmax=10
 set foldmethod=indent
 
 "undo
-set undofile
-if empty(glob('~/.config/nvim/vimundo'))
-    silent !mkdir ~/.config/nvim/vimundo
+let s:unddir = stdpath('data') . '/vimundo/'
+if empty(glob(s:unddir))
+    execute '!mkdir ' s:unddir
 endif
-set undodir=~/.config/nvim/vimundo/
+set undodir=s:unddir
+set undofile
 
 "invisible char
 set listchars=eol:↲,tab:→\ ,trail:•,extends:⟩,precedes:⟨,space:·
@@ -67,7 +69,7 @@ endif
 
 "auto spell for markdown
 autocmd FileType markdown setlocal spell
-autocmd FileType latex setlocal spell
+autocmd FileType tex setlocal spell
 
 "auto remove trailing spacews when saving a file
 autocmd BufWritePre * :%s/\s\+$//e

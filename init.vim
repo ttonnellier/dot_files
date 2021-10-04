@@ -6,8 +6,10 @@ if empty(glob(s:vimplg))
 endif
 call plug#begin(stdpath('data') . '/plugged')
 Plug 'itchyny/lightline.vim'
+Plug 'itchyny/vim-gitbranch'
 Plug 'patstockwell/vim-monokai-tasty'
 Plug 'junegunn/vim-easy-align'
+Plug 'tpope/vim-surround'
 Plug 'neovim/nvim-lspconfig'
 call plug#end()
 
@@ -15,12 +17,28 @@ call plug#end()
 syntax enable
 filetype plugin on
 filetype indent on
+set omnifunc=syntaxcomplete#Complete
 set autoindent
 
 "colorscheme
 let g:vim_monokai_tasty_italic = 1                    " allow italics, set this before the colorscheme
 colorscheme vim-monokai-tasty                         " set the colorscheme
-let g:lightline = { 'colorscheme': 'monokai_tasty' }  " lightline theme
+"let g:lightline = { 'colorscheme': 'one' }  " lightline theme
+let g:lightline = {
+\     'active': {
+\         'left': [ ['mode', 'paste' ],
+\                   ['readonly', 'filename', 'modified'],
+\                   ['gitbranch']],
+\         'right': [['lineinfo'],
+\                   ['percent'],
+\                   ['fileformat', 'fileencoding']]
+\     },
+\     'component_function': {
+\         'gitbranch': 'gitbranch#name'
+\     },
+\     'colorscheme': 'PaperColor',
+\ }
+set noshowmode
 
 "tabs
 set shiftwidth=4
@@ -49,10 +67,11 @@ set foldmethod=indent
 
 "undo
 let s:unddir = stdpath('data') . '/vimundo/'
+echo s:unddir
 if empty(glob(s:unddir))
     execute '!mkdir ' s:unddir
 endif
-set undodir=s:unddir
+let &undodir=s:unddir
 set undofile
 
 "invisible char

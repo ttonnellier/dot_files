@@ -23,7 +23,6 @@ set autoindent
 "colorscheme
 let g:vim_monokai_tasty_italic = 1                    " allow italics, set this before the colorscheme
 colorscheme vim-monokai-tasty                         " set the colorscheme
-"let g:lightline = { 'colorscheme': 'one' }  " lightline theme
 let g:lightline = {
 \     'active': {
 \         'left': [ ['mode', 'paste' ],
@@ -58,6 +57,7 @@ set path+=**
 set wildmenu
 set incsearch
 set hlsearch
+set smartcase
 
 "fold
 set foldenable
@@ -76,9 +76,11 @@ set undofile
 
 "invisible char
 set listchars=eol:↲,tab:→\ ,trail:•,extends:⟩,precedes:⟨,space:·
-highlight SpecialKey ctermfg=236
-highlight NonText ctermfg=236
+highlight SpecialKey ctermfg=237
+highlight NonText ctermfg=237
+highlight WhiteSpace ctermfg=237
 set list
+
 
 "when reopen a file, jump where we were
 if has("autocmd")
@@ -99,6 +101,9 @@ nnoremap <F3> :set paste!<cr>
 
 "nvim terminal exit
 tnoremap <Esc> <C-\><C-n>
+
+"name of highlight
+command! What echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 
 "plugin easy align
 ""start interactive EasyAlign in visual mode (e.g. vipga)
@@ -121,9 +126,23 @@ let g:easy_align_delimiters = {
 
 "lsp
 lua << EOF
--- require'lspconfig'.texlab.setup{}
 local nvim_lsp = require('lspconfig')
+local configs = require('lspconfig/configs')
+local util = require('lspconfig/util')
 
+-- Manual add rust_hdl server
+if not nvim_lsp.rust_hdl then
+  configs.rust_hdl = {
+    default_config = {
+      cmd = {'/home/tibo/Documents/code/rust_hdl/target/release/vhdl_ls'};
+      filetypes = { "vhdl" };
+      root_dir = function(fname)
+        return util.root_pattern('vhdl_ls.toml')(fname)
+      end;
+      settings = {};
+    };
+  }
+end
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
@@ -159,7 +178,7 @@ end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { 'texlab' }
+local servers = { 'pyright', 'texlab', 'rust_hdl' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,

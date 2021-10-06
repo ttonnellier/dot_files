@@ -1,0 +1,21 @@
+[user]
+	email = ttonnellier@silicom.fr
+	name = Thibaud Tonnellier
+[core]
+	editor = nvim
+	autocrlf = true
+[diff]
+	tool = nvimdiff
+[difftool "nvimdiff"]
+    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+[difftool]
+	prompt = true
+[alias]
+	d = difftool
+[merge]
+	tool = nvim
+    #conflictstyle = diff3
+[mergetool]
+	prompt = false
+[mergetool "nvimdiff"]
+	cmd = "nvim -f -d -c '4wincmd w | wincmd J' \"$LOCAL\" \"$BASE\" \"$REMOTE\" \"$MERGED\"

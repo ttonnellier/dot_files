@@ -9,13 +9,14 @@
 [difftool "nvimdiff"]
     cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 [difftool]
-	prompt = true
+	prompt = false
+    trustExitCode = true
 [alias]
 	d = difftool
 [merge]
 	tool = nvim
-    #conflictstyle = diff3
 [mergetool]
 	prompt = false
+    trustExitCode = true
 [mergetool "nvimdiff"]
-	cmd = "nvim -f -d -c '4wincmd w | wincmd J' \"$LOCAL\" \"$BASE\" \"$REMOTE\" \"$MERGED\"
+	cmd = "nvim -f -d -c '4wincmd w | wincmd J' \"$LOCAL\" \"$BASE\" \"$REMOTE\" \"$MERGED\""

@@ -10,9 +10,11 @@ Plug 'itchyny/vim-gitbranch'
 Plug 'patstockwell/vim-monokai-tasty'
 Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
 Plug 'neovim/nvim-lspconfig'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
+Plug 'vim-scripts/diffchanges.vim'
 call plug#end()
 
 "syntax
@@ -21,6 +23,10 @@ filetype plugin on
 filetype indent on
 set omnifunc=syntaxcomplete#Complete
 set autoindent
+set backspace=indent,eol,start
+
+"performance
+set complete-=i
 
 "colorscheme
 let g:vim_monokai_tasty_italic = 1                    " allow italics, set this before the colorscheme
@@ -46,13 +52,19 @@ set shiftwidth=4
 set tabstop=4
 set softtabstop=4
 set expandtab
+set shiftround
 
 "look
 set number relativenumber
 set showcmd
 set cursorline
 set showmatch
-set nowrap
+
+"text rendering
+set display+=lastline
+set sidescrolloff=5
+set scrolloff=1
+set wrap
 
 "search
 set path+=**
@@ -60,10 +72,14 @@ set wildmenu
 set incsearch
 set hlsearch
 set smartcase
-
+" Use <C-L> to clear the highlighting of :set hlsearch.
+if maparg('<C-L>', 'n') ==# ''
+  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+endif
+"
 "fold
 set foldenable
-set foldlevelstart=10
+set foldlevelstart=6
 set foldnestmax=10
 set foldmethod=indent
 
@@ -83,12 +99,13 @@ highlight NonText ctermfg=237
 highlight WhiteSpace ctermfg=237
 set list
 
-
 "when reopen a file, jump where we were
 if has("autocmd")
     au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
         \| exe "normal! g'\"" | endif
 endif
+
+set autoread
 
 "auto spell for markdown and tex
 autocmd FileType markdown setlocal spell
@@ -100,6 +117,15 @@ autocmd BufWritePre * :%s/\s\+$//e
 "shortcut for paste option
 inoremap <F3> <esc>:set paste!<cr>i
 nnoremap <F3> :set paste!<cr>
+
+"clang-format shortcut
+if has('python')
+  map <C-I> :pyf /home/tibo/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:pyf /home/tibo/Documents/code/clang-format.py<cr>
+elseif has('python3')
+  map <C-I> :py3f /home/tibo/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:py3f /home/tibo/Documents/code/clang-format.py<cr>
+endif
 
 "nvim terminal exit
 tnoremap <Esc> <C-\><C-n>
@@ -214,6 +240,7 @@ dap.configurations.cpp = {
 }
 local opt = { noremap=true, silent=true }
 vim.api.nvim_set_keymap('n', '<leader>dc',  '<cmd>lua require"dap".continue()<CR>',          opt)
+vim.api.nvim_set_keymap('n', '<leader>dd',  '<cmd>lua require"dap".terminate()<CR>',         opt)
 vim.api.nvim_set_keymap('n', '<leader>dr',  '<cmd>lua require"dap".repl.toggle()<CR>',       opt)
 vim.api.nvim_set_keymap('n', '<leader>dK',  '<cmd>lua require"dap.ui.widgets".hover()<CR>',  opt)
 vim.api.nvim_set_keymap('n', '<leader>dt',  '<cmd>lua require"dap".toggle_breakpoint()<CR>', opt)

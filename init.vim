@@ -9,12 +9,19 @@ Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'patstockwell/vim-monokai-tasty'
 Plug 'junegunn/vim-easy-align'
+Plug 'junegunn/limelight.vim'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'neovim/nvim-lspconfig'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'vim-scripts/diffchanges.vim'
+Plug 'daeyun/vim-matlab'
+"Plug 'MortenStabenau/matlab-vim'
+Plug 'Shougo/deoplete.nvim'
+Plug 'Shougo/neco-syntax'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 call plug#end()
 
 "syntax
@@ -133,12 +140,14 @@ tnoremap <Esc> <C-\><C-n>
 "name of highlight
 command! What echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 
-"plugin easy align
-""start interactive EasyAlign in visual mode (e.g. vipga)
+"plugins
+
+""easy align
+"""start interactive EasyAlign in visual mode (e.g. vipga)
 xmap ga <Plug>(EasyAlign)
-"start interactive EasyAlign for a motion/text object (e.g. gaip)
+"""start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap ga <Plug>(EasyAlign)
-""extend alignment rules for VHDL
+"""extend alignment rules for VHDL
 let g:easy_align_delimiters = {
 \ ':': {
 \     'pattern': ':',
@@ -152,7 +161,18 @@ let g:easy_align_delimiters = {
 \     'stick_to_left': 1 },
 \ }
 
-"lsp
+""deoplete
+let g:deoplete#enable_at_startup = 1
+
+""snippets
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
+
+""matlab-vim
+let g:matlab_auto_mappings = 0
+
+""lsp
 lua << EOF
 local lspconfig = require 'lspconfig'
 local configs = require 'lspconfig.configs'
@@ -216,7 +236,7 @@ for _, lsp in ipairs(servers) do
 end
 EOF
 
-"dap
+""dap
 lua << EOF
 local dap = require('dap')
 dap.adapters.lldb = {

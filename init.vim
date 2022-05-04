@@ -60,9 +60,41 @@ set splitbelow
 set splitright
 
 "colorscheme
-colorscheme monokai_pro
-hi vhdlTSType guifg=#61c4ef
-"colorscheme space_vim_theme
+lua << EOF
+local monokai = require('monokai')
+local palette = monokai.pro
+monokai.setup {
+    custom_hlgroups = {
+        vhdlTSType = {
+            fg = '#61c4ef',
+        },
+        vhdlTSConditional = {
+            fg = palette.orange,
+        },
+        vhdlTSKeywordFunction = {
+            --fg = '#ff94ae',
+            fg = '#e02266',
+            style = 'italic',
+        },
+        vhdlTSRepeat = {
+            fg = '#fe8019',
+        },
+        vhdlTSInclude = {
+            fg = '#dbae93',
+        },
+        vhdlTSConstMacro = {
+            fg = '#e4fd9d',
+        },
+        vhdlTSException = {
+            fg = '#cc241d',
+        },
+    }
+}
+EOF
+"colorscheme monokai_pro
+"hi vhdlTSType guifg=#61c4ef
+"hi vhdlTSConditional guifg=#61c4ef
+
 let g:lightline = {
 \     'active': {
 \         'left': [ ['mode', 'paste' ],

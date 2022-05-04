@@ -19,7 +19,6 @@ endfunction
 call plug#begin(stdpath('data') . '/plugged')
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
-"Plug 'liuchengxu/space-vim-theme'
 Plug 'tanvirtin/monokai.nvim'
 Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-surround'
@@ -27,6 +26,9 @@ Plug 'tpope/vim-commentary'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'Shougo/neco-syntax'
 Plug 'Shougo/neopairs.vim'
+Plug 'mfussenegger/nvim-dap'
+Plug 'rcarriga/nvim-dap-ui'
+Plug 'vim-scripts/diffchanges.vim'
 "Plug 'deoplete-plugins/deoplete-lsp', { 'for': ['python', 'latex', 'tex']}
 Plug 'neovim/nvim-lspconfig', Cond(!exists('g:vscode'))
 "Plug 'nvim-lua/completion-nvim', Cond(!exists('g:vscode'))
@@ -48,6 +50,10 @@ set completeopt=menuone
 set completeopt+=noinsert
 set completeopt-=preview
 set autoindent
+set backspace=indent,eol,start
+
+"performance
+set complete-=i
 
 "splits location
 set splitbelow
@@ -84,7 +90,12 @@ set number relativenumber
 set showcmd
 set cursorline
 set showmatch
-set nowrap
+
+"text rendering
+set display+=lastline
+set sidescrolloff=5
+set scrolloff=1
+set wrap
 
 "search
 set path+=**
@@ -92,11 +103,16 @@ set wildmenu
 set incsearch
 set hlsearch
 set smartcase
+"
+" Use <C-L> to clear the highlighting of :set hlsearch.
+if maparg('<C-L>', 'n') ==# ''
+  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+endif
 
 "fold
-"set foldenable
-"set foldlevelstart=10
-"set foldnestmax=10
+set foldenable
+set foldlevelstart=6
+set foldnestmax=10
 set foldmethod=indent
 
 "undo
@@ -125,6 +141,8 @@ if has("autocmd")
         \| exe "normal! g'\"" | endif
 endif
 
+set autoread
+
 "auto spell for markdown
 autocmd FileType markdown setlocal spell
 autocmd FileType tex setlocal spell
@@ -141,6 +159,15 @@ tnoremap <Esc> <C-\><C-n>
 
 "name of highlight
 command! What echo synIDattr(synID(line('.'), col('.'), 1), 'name')
+
+"clang-format shortcut
+if has('python')
+  map <C-I> :pyf /home/tibo/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:pyf /home/tibo/Documents/code/clang-format.py<cr>
+elseif has('python3')
+  map <C-I> :py3f /home/tibo/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:py3f /home/tibo/Documents/code/clang-format.py<cr>
+endif
 
 "plugins
 
@@ -218,7 +245,7 @@ local configs = require 'lspconfig.configs'
 if not configs.rust_hdl then
   configs.rust_hdl = {
     default_config = {
-      cmd = {'/home/storm/Documents/code/rust_hdl/target/release/vhdl_ls'};
+      cmd = {'/home/tibo/Documents/code/rust_hdl/target/release/vhdl_ls'};
       filetypes = { "vhdl" };
       root_dir = function(fname)
         return lspconfig.util.root_pattern('vhdl_ls.toml')(fname)
@@ -271,5 +298,42 @@ for _, lsp in ipairs(servers) do
     }
   }
 end
+EOF
+
+"dap
+lua << EOF
+local dap = require('dap')
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/usr/bin/lldb-vscode', -- adjust as needed
+  name = "lldb"
+}
+dap.configurations.cpp = {
+  {
+    name = "Launch",
+    type = "lldb",
+    request = "launch",
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+    runInTerminal = false,
+  },
+}
+local opt = { noremap=true, silent=true }
+vim.api.nvim_set_keymap('n', '<leader>dc',  '<cmd>lua require"dap".continue()<CR>',          opt)
+vim.api.nvim_set_keymap('n', '<leader>dd',  '<cmd>lua require"dap".terminate()<CR>',         opt)
+vim.api.nvim_set_keymap('n', '<leader>dr',  '<cmd>lua require"dap".repl.toggle()<CR>',       opt)
+vim.api.nvim_set_keymap('n', '<leader>dK',  '<cmd>lua require"dap.ui.widgets".hover()<CR>',  opt)
+vim.api.nvim_set_keymap('n', '<leader>dt',  '<cmd>lua require"dap".toggle_breakpoint()<CR>', opt)
+vim.api.nvim_set_keymap('n', '<leader>dso', '<cmd>lua require"dap".step_over()<CR>',         opt)
+vim.api.nvim_set_keymap('n', '<leader>dsi', '<cmd>lua require"dap".step_into()<CR>',         opt)
+vim.api.nvim_set_keymap('n', '<leader>dl',  '<cmd>lua require"dap".run_last()<CR>',          opt)
+vim.api.nvim_set_keymap('n', '<leader>ds',  '<cmd>lua require"dapui".setup()<CR>',           opt)
+vim.api.nvim_set_keymap('n', '<leader>do',  '<cmd>lua require"dapui".open()<CR>',            opt)
+vim.api.nvim_set_keymap('n', '<leader>dx',  '<cmd>lua require"dapui".close()<CR>',           opt)
+vim.api.nvim_set_keymap('n', '<leader>de',  '<cmd>lua require"dapui".eval()<CR>',            opt)
 EOF
 endif

@@ -22,7 +22,7 @@ Plug 'itchyny/vim-gitbranch'
 Plug 'tanvirtin/monokai.nvim'
 Plug 'junegunn/vim-easy-align'
 Plug 'tpope/vim-surround'
-Plug 'tpope/vim-commentary'
+Plug 'tyru/caw.vim'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'Shougo/neco-syntax'
 Plug 'Shougo/neopairs.vim'
@@ -36,8 +36,10 @@ Plug 'neovim/nvim-lspconfig', Cond(!exists('g:vscode'))
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'daeyun/vim-matlab', { 'do': ':UpdateRemotePlugins' }
-Plug 'alemuller/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'nvim-treesitter/playground'
+"Plug 'alemuller/nvim-treesitter', {'do': ':TSUpdate'}
+"Plug 'nvim-treesitter/playground'
+Plug 'Cognoscan/vim-vhdl'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown']}
 call plug#end()
 
 "syntax
@@ -65,28 +67,27 @@ local monokai = require('monokai')
 local palette = monokai.pro
 monokai.setup {
     custom_hlgroups = {
-        vhdlTSType = {
-            fg = '#61c4ef',
-        },
-        vhdlTSConditional = {
+        vhdlOperator = {
             fg = palette.orange,
         },
-        vhdlTSKeywordFunction = {
-            --fg = '#ff94ae',
-            fg = '#e02266',
+        vhdlStatement = {
+            fg = palette.red,
             style = 'italic',
         },
-        vhdlTSRepeat = {
-            fg = '#fe8019',
+        vhdlAttribute = {
+            fg = palette.green,
         },
-        vhdlTSInclude = {
+        vhdlStorageClass = {
+            fg = "#85dacc",
+        },
+        vhdlLibrary = {
             fg = '#dbae93',
         },
-        vhdlTSConstMacro = {
+        vhdlConstantMacro = {
             fg = '#e4fd9d',
         },
-        vhdlTSException = {
-            fg = '#cc241d',
+        Error = {
+            fg = "#f3005f", --palette.red,
         },
     }
 }
@@ -116,7 +117,7 @@ set shiftwidth=4
 set tabstop=4
 set softtabstop=4
 set expandtab
-
+autocmd FileType vhdl setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab
 "look
 set number relativenumber
 set showcmd
@@ -142,11 +143,13 @@ if maparg('<C-L>', 'n') ==# ''
 endif
 
 "fold
-set foldenable
-set foldlevelstart=6
-set foldnestmax=10
+"set foldenable
+set foldlevel=20
+"set foldnestmax=10
 set foldmethod=indent
-
+"set foldminlines=1
+"set foldmethod=expr
+"set foldexpr=nvim_treesitter#foldexpr()
 "undo
 let s:unddir = stdpath('data') . '/vimundo/'
 echo s:unddir
@@ -194,11 +197,11 @@ command! What echo synIDattr(synID(line('.'), col('.'), 1), 'name')
 
 "clang-format shortcut
 if has('python')
-  map <C-I> :pyf /home/tibo/Documents/code/clang-format.py<cr>
-  imap <C-I> <c-o>:pyf /home/tibo/Documents/code/clang-format.py<cr>
+  map <C-I> :pyf /home/storm/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:pyf /home/storm/Documents/code/clang-format.py<cr>
 elseif has('python3')
-  map <C-I> :py3f /home/tibo/Documents/code/clang-format.py<cr>
-  imap <C-I> <c-o>:py3f /home/tibo/Documents/code/clang-format.py<cr>
+  map <C-I> :py3f /home/storm/Documents/code/clang-format.py<cr>
+  imap <C-I> <c-o>:py3f /home/storm/Documents/code/clang-format.py<cr>
 endif
 
 "plugins
@@ -236,37 +239,40 @@ let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
 let g:matlab_auto_mappings = 0
 
 ""treesitter
-lua << EOF
-require'nvim-treesitter.configs'.setup {
-    ensure_installed = {"vhdl", "python", "cpp", "latex", "vim"},
-    highlight = {
-        enable = true,
-        disable = {},
-        additional_vim_regex_highlighting = true,
-    },
-    incremental_selection = {
-        enable = false,
-    },
-  playground = {
-    enable = true,
-    disable = {},
-    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-    persist_queries = false, -- Whether the query persists across vim sessions
-    keybindings = {
-      toggle_query_editor = 'o',
-      toggle_hl_groups = 'i',
-      toggle_injected_languages = 't',
-      toggle_anonymous_nodes = 'a',
-      toggle_language_display = 'I',
-      focus_language = 'f',
-      unfocus_language = 'F',
-      update = 'R',
-      goto_node = '<cr>',
-      show_help = '?',
-    },
-  }
-}
-EOF
+"lua << EOF
+"require'nvim-treesitter.configs'.setup {
+"    ensure_installed = {"vhdl", "python", "cpp", "latex", "vim"},
+"    highlight = {
+"        enable = true,
+"        disable = {},
+"        additional_vim_regex_highlighting = true,
+"    },
+"    indent = {
+"       enable = true
+"    },
+"    incremental_selection = {
+"        enable = false,
+"    },
+"  playground = {
+"    enable = true,
+"    disable = {},
+"    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+"    persist_queries = false, -- Whether the query persists across vim sessions
+"    keybindings = {
+"      toggle_query_editor = 'o',
+"      toggle_hl_groups = 'i',
+"      toggle_injected_languages = 't',
+"      toggle_anonymous_nodes = 'a',
+"      toggle_language_display = 'I',
+"      focus_language = 'f',
+"      unfocus_language = 'F',
+"      update = 'R',
+"      goto_node = '<cr>',
+"      show_help = '?',
+"    },
+"  }
+"}
+"EOF
 
 ""lsp
 lua << EOF
@@ -277,7 +283,7 @@ local configs = require 'lspconfig.configs'
 if not configs.rust_hdl then
   configs.rust_hdl = {
     default_config = {
-      cmd = {'/home/tibo/Documents/code/rust_hdl/target/release/vhdl_ls'};
+      cmd = {'/home/storm/Documents/code/rust_hdl/target/release/vhdl_ls'};
       filetypes = { "vhdl" };
       root_dir = function(fname)
         return lspconfig.util.root_pattern('vhdl_ls.toml')(fname)
@@ -314,7 +320,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
   buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 
 end

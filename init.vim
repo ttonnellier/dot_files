@@ -21,7 +21,6 @@ Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'tanvirtin/monokai.nvim'
 Plug 'junegunn/vim-easy-align'
-Plug 'tpope/vim-surround'
 Plug 'tyru/caw.vim'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'Shougo/neco-syntax'
@@ -29,18 +28,18 @@ Plug 'Shougo/neopairs.vim'
 Plug 'mfussenegger/nvim-dap'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'vim-scripts/diffchanges.vim'
-"Plug 'deoplete-plugins/deoplete-lsp', { 'for': ['python', 'latex', 'tex']}
 Plug 'neovim/nvim-lspconfig', Cond(!exists('g:vscode'))
+"Plug 'deoplete-plugins/deoplete-lsp', { 'for': ['python', 'latex', 'tex']}
 "Plug 'nvim-lua/completion-nvim', Cond(!exists('g:vscode'))
 "Plug 'nvim-lua/lsp-status.nvim', Cond(!exists('g:vscode'))
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'daeyun/vim-matlab', { 'do': ':UpdateRemotePlugins' }
-"Plug 'alemuller/nvim-treesitter', {'do': ':TSUpdate'}
-"Plug 'nvim-treesitter/playground'
 Plug 'Cognoscan/vim-vhdl'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown']}
-call plug#end()
+Plug 'machakann/vim-sandwich'
+Plug 'preservim/tagbar'
+call plug#end( )
 
 "syntax
 syntax on
@@ -53,7 +52,6 @@ set completeopt+=noinsert
 set completeopt-=preview
 set autoindent
 set backspace=indent,eol,start
-
 "performance
 set complete-=i
 
@@ -89,26 +87,31 @@ monokai.setup {
         Error = {
             fg = "#f3005f", --palette.red,
         },
+        TagbarKind = {
+            style = 'bold',
+        }
     }
 }
 EOF
-"colorscheme monokai_pro
-"hi vhdlTSType guifg=#61c4ef
-"hi vhdlTSConditional guifg=#61c4ef
+
+"statusline
 
 let g:lightline = {
 \     'active': {
 \         'left': [ ['mode', 'paste' ],
-\                   ['readonly', 'filename', 'modified'],
+\                   ['readonly', 'filename', 'modified', 'tagbar'],
 \                   ['gitbranch']],
 \         'right': [['lineinfo'],
 \                   ['percent'],
 \                   ['fileformat', 'fileencoding']]
 \     },
 \     'component_function': {
-\         'gitbranch': 'gitbranch#name'
+\         'gitbranch': 'gitbranch#name',
 \     },
-\     'colorscheme': 'PaperColor',
+\     'component': {
+\         'tagbar': '%{tagbar#currenttag("[%s]", "")}',
+\     },
+\     'colorscheme': 'darcula',
 \ }
 set noshowmode
 
@@ -118,6 +121,7 @@ set tabstop=4
 set softtabstop=4
 set expandtab
 autocmd FileType vhdl setlocal shiftwidth=2 softtabstop=2 tabstop=2 expandtab
+
 "look
 set number relativenumber
 set showcmd
@@ -128,7 +132,7 @@ set showmatch
 set display+=lastline
 set sidescrolloff=5
 set scrolloff=1
-set wrap
+set nowrap
 
 "search
 set path+=**
@@ -149,7 +153,7 @@ set foldlevel=20
 set foldmethod=indent
 "set foldminlines=1
 "set foldmethod=expr
-"set foldexpr=nvim_treesitter#foldexpr()
+
 "undo
 let s:unddir = stdpath('data') . '/vimundo/'
 echo s:unddir
@@ -178,7 +182,7 @@ endif
 
 set autoread
 
-"auto spell for markdown
+"auto spell for markdown and tex
 autocmd FileType markdown setlocal spell
 autocmd FileType tex setlocal spell
 
@@ -192,17 +196,20 @@ nnoremap <F3> :set paste!<cr>
 "nvim terminal exit
 tnoremap <Esc> <C-\><C-n>
 
-"name of highlight
-command! What echo synIDattr(synID(line('.'), col('.'), 1), 'name')
-
 "clang-format shortcut
 if has('python')
-  map <C-I> :pyf /home/storm/Documents/code/clang-format.py<cr>
-  imap <C-I> <c-o>:pyf /home/storm/Documents/code/clang-format.py<cr>
+  map <F4> :pyf /home/storm/Documents/code/clang-format.py<cr>
+  imap <F4>:pyf /home/storm/Documents/code/clang-format.py<cr>
 elseif has('python3')
-  map <C-I> :py3f /home/storm/Documents/code/clang-format.py<cr>
-  imap <C-I> <c-o>:py3f /home/storm/Documents/code/clang-format.py<cr>
+  map <F4> :py3f /home/storm/Documents/code/clang-format.py<cr>
+  imap <F4>:py3f /home/storm/Documents/code/clang-format.py<cr>
 endif
+
+"shortcut toggle spell
+map <F5> :setlocal spell! spelllang=en_gb<CR>
+
+"no mouse
+set mouse=
 
 "plugins
 
@@ -215,7 +222,7 @@ nmap ga <Plug>(EasyAlign)
 let g:easy_align_delimiters = {
 \ ':': {
 \     'pattern': ':',
-\     'left_margin': 0,
+\     'left_margin': 1,
 \     'right_margin': 1,
 \     'stick_to_left': 0 },
 \ ')': {
@@ -225,10 +232,39 @@ let g:easy_align_delimiters = {
 \     'stick_to_left': 1 },
 \ }
 
-if !exists('g:vscode')
+
+""tagbar
+autocmd FileType c,cpp,vhdl nested :TagbarOpen
+let g:tagbar_position = 'topleft vertical'
+let g:tagbar_width = '35'
+let g:tagbar_foldlevel = 0
+let g:tagbar_type_vhdl = {
+   \ 'ctagstype': 'vhdl',
+   \ 'kinds' : [
+       \'A:alias',
+       \'C:component',
+       \'P:package',
+       \'Q:process',
+       \'T:subtype',
+       \'a:architecture',
+       \'c:constant',
+       \'d:prototype',
+       \'e:entity',
+       \'f:function',
+       \'g:generic',
+       \'l:local',
+       \'p:procedure',
+       \'q:port',
+       \'r:record',
+       \'s:signal',
+       \'t:type'
+   \]
+\}
 
 ""deoplete
 let g:deoplete#enable_at_startup = 1
+call deoplete#custom#source('_', 'sorters', ['sorter_word'])
+call deoplete#custom#source('ultisnips', 'rank', 9999)
 
 ""snippets
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -238,41 +274,21 @@ let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
 ""matlab-vim
 let g:matlab_auto_mappings = 0
 
-""treesitter
-"lua << EOF
-"require'nvim-treesitter.configs'.setup {
-"    ensure_installed = {"vhdl", "python", "cpp", "latex", "vim"},
-"    highlight = {
-"        enable = true,
-"        disable = {},
-"        additional_vim_regex_highlighting = true,
-"    },
-"    indent = {
-"       enable = true
-"    },
-"    incremental_selection = {
-"        enable = false,
-"    },
-"  playground = {
-"    enable = true,
-"    disable = {},
-"    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-"    persist_queries = false, -- Whether the query persists across vim sessions
-"    keybindings = {
-"      toggle_query_editor = 'o',
-"      toggle_hl_groups = 'i',
-"      toggle_injected_languages = 't',
-"      toggle_anonymous_nodes = 'a',
-"      toggle_language_display = 'I',
-"      focus_language = 'f',
-"      unfocus_language = 'F',
-"      update = 'R',
-"      goto_node = '<cr>',
-"      show_help = '?',
-"    },
-"  }
-"}
-"EOF
+""vim sandwich
+let g:sandwich_no_default_key_mappings = 1
+silent! nmap <unique><silent> Sd <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+silent! nmap <unique><silent> Sr <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-query-a)
+silent! nmap <unique><silent> Sdb <Plug>(operator-sandwich-delete)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+silent! nmap <unique><silent> Srb <Plug>(operator-sandwich-replace)<Plug>(operator-sandwich-release-count)<Plug>(textobj-sandwich-auto-a)
+
+let g:operator_sandwich_no_default_key_mappings = 1
+" add
+silent! map <unique> Sa <Plug>(operator-sandwich-add)
+" delete
+silent! xmap <unique> Sd <Plug>(operator-sandwich-delete)
+" replace
+silent! xmap <unique> Sr <Plug>(operator-sandwich-replace)
+
 
 ""lsp
 lua << EOF
@@ -341,23 +357,40 @@ EOF
 "dap
 lua << EOF
 local dap = require('dap')
-dap.adapters.lldb = {
-  type = 'executable',
-  command = '/usr/bin/lldb-vscode', -- adjust as needed
-  name = "lldb"
-}
+dap.adapters.cppdbg = {
+    id = 'cppdbg',
+    type = 'executable',
+    command = '/home/storm/Downloads/cpptools-linux-aarch64/extension/debugAdapters/bin/OpenDebugAD7', -- adjust as needed
+    }
 dap.configurations.cpp = {
+    {
+        name = "Launch file",
+        type = "cppdbg",
+        request = "launch",
+        program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', '5G_simu')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = true,
+    },
+    {
+        name = 'Attach to gdbserver :1234',
+        type = 'cppdbg',
+        request = 'launch',
+        MIMode = 'gdb',
+        miDebuggerServerAddress = 'localhost:1234',
+        miDebuggerPath = '/usr/bin/gdb',
+        cwd = '${workspaceFolder}',
+        program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+    },
+    setupCommands = {
   {
-    name = "Launch",
-    type = "lldb",
-    request = "launch",
-    program = function()
-      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-    end,
-    cwd = '${workspaceFolder}',
-    stopOnEntry = false,
-    args = {},
-    runInTerminal = false,
+     text = '-enable-pretty-printing',
+     description =  'enable pretty printing',
+     ignoreFailures = false
+  },
   },
 }
 local opt = { noremap=true, silent=true }
@@ -374,4 +407,3 @@ vim.api.nvim_set_keymap('n', '<leader>do',  '<cmd>lua require"dapui".open()<CR>'
 vim.api.nvim_set_keymap('n', '<leader>dx',  '<cmd>lua require"dapui".close()<CR>',           opt)
 vim.api.nvim_set_keymap('n', '<leader>de',  '<cmd>lua require"dapui".eval()<CR>',            opt)
 EOF
-endif
